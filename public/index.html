@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ja">
+	<head>
+		<title>RealTime - FakeScope</title>
+		<meta charset="UTF-8" />
+		<link href="css/bootstrap.min.css" rel="stylesheet">
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+		<script src="js/bootstrap.min.js"></script>
+	</head>
+	<body>
+		<div class="page-header">
+			<h1>RealTime</h1>
+		</div>
+		<div class="container-fluid">
+			<div class="row">
+				<div id="graphDiv" class="span8" style="height: 400px;"></div>
+				<div class="span4">
+					<h3>Control</h3>
+					<button class="btn btn-primary" id="streamCtrl" data-loading-text="Streaming...">Stream</button>
+					<button class="btn btn-danger" id="recording">Record</button>
+					<h4>Recording Remain</h4>
+					<div class="progress progress-danger" id="recordProgressBar" >
+						<div class="bar" style="width: 0%;"></div>
+					</div>
+				</div>
+				<!--
+				<div class="span4">
+					<h2>System</h2>
+					<dl class="dl-horizontal">
+						<dt>WebSocket Server</dt>
+						<dd id="serverName">none</dd>
+						<dt>Connection</dt>
+						<dd id="serverConn">False</dd>
+						<dt>Redrawing Interval</dt>
+						<dd id="interval">Stopping...</dd>
+					</dl>
+				</div>
+				-->
+				<div class="span4">
+					<h3>Channels</h3>
+					<ol>
+						<li id="nameCh1" class="alert alert-info">Channel 1</li>
+						<li id="nameCh2" class="alert">Channel 2</li>
+						<li id="nameCh3" class="alert alert-error">Channel 3</li>
+						<li id="nameCh4" class="alert alert-success">Channel 4</li>
+					</ol>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript" src="flotr2.js"></script>
+		<script type="text/javascript">
+			// Display
+			oscillo = [];
+			MAX_OCL = 200;
+			reloadTimerId = null;
+			reloadSpeed = 100;  // msec
+			wsServer = "ws://caramel.local:9540";
+
+			// Saving
+			savePointsData = [];
+			MAX_SAVE_POINTS = 1000;
+			saveState = false;
+
+			// WebSocketサーバに接続
+			ws = new WebSocket(wsServer);
+			ws.onmessage = function(evt) {
+				var point = evt.data.split(",");
+				oscillo.push([point[0], point[1]]);
+				if(saveState){
+					savePointsData.push([point[0], point[1]]);
+					// 割合
+					var wariai = Math.floor(savePointsData.length / MAX_SAVE_POINTS*100);
+					$(".bar").width(wariai+"\%");
+					if(savePointsData.length > MAX_SAVE_POINTS){
+						saveState = false;
+						$("#recording").button('toggle');
+					}
+				}
+				if(oscillo.length > MAX_OCL){
+					oscillo.shift();
+				}
+			}
+
+			var graph;
+			var container = document.getElementById("graphDiv");
+
+			// Draw Graph
+			function drawGraph(){
+				graph = Flotr.draw(container, [ oscillo ], {
+					xaxis: {
+						minorTickFreq: 4
+					}, 
+					yaxis: {
+						max: 1000,
+						min: 0
+					},
+					grid: {
+						minorVerticalLines: true
+					}
+				});
+			}
+
+			function redraw(){
+				if(reloadTimerId){
+					// タイマー設定済み
+					clearInterval(reloadTimerId);
+					reloadTimerId = null;
+					ws.close();
+					$("#streamCtrl").button('toggle');
+					//$("#serverName").text("None");
+					//$("#serverConn").text("False");
+					//$("#interval").text("-");
+				} else {
+					ws = new WebSocket(wsServer);
+					reloadTimerId = setInterval(function(){
+						drawGraph();
+						}, reloadSpeed);
+					$("#streamCtrl").button('toggle');
+					//$("#serverName").text(wsServer);
+					//$("#serverConn").text("True");
+					//$("#interval").text(reloadSpeed+"ms");
+				}
+			}
+			redraw();
+			$("#streamCtrl").click(redraw);
+
+			// Pushed "Recording" Button
+			$("#recording").click(function(){
+				if(!saveState && reloadTimerId){
+					$("#recording").button('toggle');
+					savePointsData = [];
+					saveState = true;
+					$(".bar").width("0%");
+				}else if(saveState && reloadTimerId){
+					saveState = false;
+					$("#recording").button('toggle');
+				}
+			});
+		</script>
+	</body>
+</html>
+

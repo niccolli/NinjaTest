@@ -4,5 +4,6 @@
 	"private": true,
 	"dependencies": {
 		"websocket-server": ">=1.4.04"
+		, "express": ">=2.5.0"
 	}
 }
