@@ -1,0 +1,8 @@
+{
+	"name":	"niccolli",
+	"version": "0.0.1",
+	"private": true,
+	"dependencies": {
+		"websocket-server": ">=1.4.04"
+	}
+}
