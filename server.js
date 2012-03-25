@@ -36,7 +36,7 @@ var device = io
 			.on('connection', function(socket){
 				console.log('device connected');
 				socket.on('send', function(msg){
-					browse.emit('push', msg);
+					browse.volatile.emit('push', msg);
 				});
 			});
 
