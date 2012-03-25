@@ -1,8 +1,9 @@
 var util = require('util');
-var ws  = require('websocket-server');
 var express = require('express');
+var socketio = require('socket.io');
 
-var app = module.exports = express.createServer();
+var app = module.exports = express.createServer(),
+	io = socketio.listen(app);
 
 app.configure(function(){
 	app.set('views', __dirname + '/views');
@@ -21,30 +22,21 @@ app.configure('production', function(){
 	app.use(express.errorHandler()); 
 });
 
-/*app.get('/', function(req, res){
-	res.render('index', {
-		title: 'Express'
-	});
-});*/
 app.listen(3000);
 
+var browse = io
+			.of('/browse')
+			.on('connection',function(socket){
+				console.log('browser connected');
+			});
 
-var streamFromID = null;
 
-var server = ws.createServer();
-
-server.addListener("connection", function(connection){
-	if(!streamFromID){
-		streamFromID = connection.id;
-		util.debug("Client connected: " + streamFromID);
-	}
-	
-	connection.addListener("message", function(message){
-		if(connection.id == streamFromID){
-			server.broadcast(message);
-		}
-	});
-});
-
-server.listen(9540);
+var device = io
+			.of('/device')
+			.on('connection', function(socket){
+				console.log('device connected');
+				socket.on('send', function(msg){
+					browse.emit('push', msg);
+				});
+			});
 

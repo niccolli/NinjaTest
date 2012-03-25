@@ -6,6 +6,7 @@
 		<link href="css/bootstrap.min.css" rel="stylesheet">
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 		<script src="js/bootstrap.min.js"></script>
+		<script src="/socket.io/socket.io.js"></script>
 	</head>
 	<body>
 		<div class="page-header">
@@ -62,9 +63,9 @@
 			saveState = false;
 
 			// WebSocketサーバに接続
-			ws = new WebSocket(wsServer);
-			ws.onmessage = function(evt) {
-				var point = evt.data.split(",");
+			var browse = io.connect('/browse');
+			browse.on('push', function(data){
+				var point = data.split(",");
 				oscillo.push([point[0], point[1]]);
 				if(saveState){
 					savePointsData.push([point[0], point[1]]);
@@ -79,7 +80,7 @@
 				if(oscillo.length > MAX_OCL){
 					oscillo.shift();
 				}
-			}
+			});
 
 			var graph;
 			var container = document.getElementById("graphDiv");
