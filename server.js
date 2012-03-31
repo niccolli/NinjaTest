@@ -24,10 +24,18 @@ app.configure('production', function(){
 
 app.listen(3000);
 
+var clientNum = 0;
+var deviceNum = 0;
+
 var browse = io
 			.of('/browse')
 			.on('connection',function(socket){
-				console.log('browser connected');
+				clientNum++;
+				console.log(clientNum+': browser connected');
+				socket.on('disconnect', function(){
+					clientNum--;
+					console.log(clientNum+': browser connected');
+				});
 			});
 
 
@@ -35,6 +43,8 @@ var device = io
 			.of('/device')
 			.on('connection', function(socket){
 				console.log('device connected');
+				deviceNum++;
+				browse.emit('notify', {device: deviceNum});
 				socket.on('send', function(msg){
 					browse.volatile.emit('push', msg);
 				});
