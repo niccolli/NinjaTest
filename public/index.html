@@ -41,7 +41,7 @@
 
 			// WebSocketサーバに接続
 			var browse = io.connect('/browse');
-			browse.on('notify' function(data){
+			browse.on('notify', function(data){
 				//deviceの個数
 				if(data.device){
 					$('#datasource').show();
