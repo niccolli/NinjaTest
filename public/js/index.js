@@ -1,4 +1,4 @@
-var MAX_OCL, browse, container, drawGraph, oscilloRaw, reloadSpeed, reloadTimerId;
+var MAX_OCL, browse, colors, container, drawGraph, oscilloRaw, reloadSpeed, reloadTimerId;
 
 oscilloRaw = [];
 
@@ -7,6 +7,16 @@ MAX_OCL = 200;
 reloadTimerId = null;
 
 reloadSpeed = 100;
+
+colors = {
+  blue: '#00a7db',
+  green: '#6cbb5a',
+  red: '#e60012',
+  yellow: '#d7c447',
+  orange: '#f39700',
+  pink: '#e85298',
+  purple: '#9b7cb6'
+};
 
 browse = io.connect('/browse');
 
@@ -28,6 +38,7 @@ drawGraph = function() {
     oscilloView.push([point[0] - first, point[1]]);
   }
   return graph = Flotr.draw(container, [oscilloView], {
+    colors: [colors.green],
     xaxis: {
       minorTickFreq: 5,
       max: 2200,
