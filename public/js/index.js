@@ -1,43 +1,48 @@
-(function() {
-  var MAX_OCL, browse, container, drawGraph, oscillo, reloadSpeed, reloadTimerId;
+var MAX_OCL, browse, container, drawGraph, oscilloRaw, reloadSpeed, reloadTimerId;
 
-  oscillo = [];
+oscilloRaw = [];
 
-  MAX_OCL = 200;
+MAX_OCL = 200;
 
-  reloadTimerId = null;
+reloadTimerId = null;
 
-  reloadSpeed = 100;
+reloadSpeed = 100;
 
-  browse = io.connect('/browse');
+browse = io.connect('/browse');
 
-  browse.on('push', function(data) {
-    var point;
-    point = data.split(",");
-    oscillo.push([point[0], point[1]]);
-    if (oscillo.length > MAX_OCL) return oscillo.shift();
+browse.on('push', function(data) {
+  var point;
+  point = data.split(",");
+  oscilloRaw.push([point[0], point[1]]);
+  if (oscilloRaw.length > MAX_OCL) return oscilloRaw.shift();
+});
+
+container = document.getElementById("graphDiv");
+
+drawGraph = function() {
+  var first, graph, oscilloView, point, _i, _len;
+  oscilloView = [];
+  first = oscilloRaw[0][0];
+  for (_i = 0, _len = oscilloRaw.length; _i < _len; _i++) {
+    point = oscilloRaw[_i];
+    oscilloView.push([point[0] - first, point[1]]);
+  }
+  return graph = Flotr.draw(container, [oscilloView], {
+    xaxis: {
+      minorTickFreq: 5,
+      max: 2200,
+      min: 0
+    },
+    yaxis: {
+      max: 1000,
+      min: 0
+    },
+    grid: {
+      minorVerticalLines: true
+    }
   });
+};
 
-  container = document.getElementById("graphDiv");
-
-  drawGraph = function() {
-    var graph;
-    return graph = Flotr.draw(container, [oscillo], {
-      xaxis: {
-        minorTickFreq: 4
-      },
-      yaxis: {
-        max: 1000,
-        min: 0
-      },
-      grid: {
-        minorVerticalLines: true
-      }
-    });
-  };
-
-  reloadTimerId = setInterval(function() {
-    return drawGraph();
-  }, reloadSpeed);
-
-}).call(this);
+reloadTimerId = setInterval(function() {
+  return drawGraph();
+}, reloadSpeed);
