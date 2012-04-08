@@ -34,8 +34,8 @@ drawGraph = function() {
       min: 0
     },
     yaxis: {
-      max: 1000,
-      min: 0
+      max: 500,
+      min: -500
     },
     grid: {
       minorVerticalLines: true
