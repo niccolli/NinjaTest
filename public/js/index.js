@@ -2,7 +2,7 @@ var MAX_OCL, browse, colors, container, drawGraph, oscilloRaw, reloadSpeed, relo
 
 oscilloRaw = [];
 
-MAX_OCL = 200;
+MAX_OCL = 300;
 
 reloadTimerId = null;
 
