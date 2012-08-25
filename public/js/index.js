@@ -41,7 +41,7 @@ drawGraph = function() {
     colors: [colors.green],
     xaxis: {
       minorTickFreq: 5,
-      max: 2200,
+      max: 2000,
       min: 0
     },
     yaxis: {
